@@ -67,6 +67,11 @@ code {
 
 /* Navbar */
 
+.logo {
+  height: 20px;
+  width: 20px;
+}
+
 .navbar {
   height: 70px;
   width: 100%;
