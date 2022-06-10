@@ -161,12 +161,16 @@ button.btn-green {
 button.btn-google {
   background-color: white;
   color: var(--color-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-.btn-google img {
+/* .btn-google img {
   width: 30px;
   margin-right: 10px;
-}
+} */
 
 button.btn-logo {
   background-color: var(--color-text);
