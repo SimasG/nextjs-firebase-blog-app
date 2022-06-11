@@ -6,7 +6,6 @@ import { useUserData } from "../lib/hooks";
 
 function MyApp({ Component, pageProps }) {
   const { user, username } = useUserData();
-  console.log(username);
   // OR
   // const userData = useUserData();
 

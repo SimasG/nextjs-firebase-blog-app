@@ -62,6 +62,7 @@ function UsernameForm() {
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // **"username" seems useless here
   const { user, username } = useContext(UserContext);
 
   useEffect(() => {
@@ -108,7 +109,7 @@ function UsernameForm() {
     e.preventDefault();
 
     const userDocRef = doc(db, "users", user.uid);
-    const usernameDocRef = doc(db, "usernames", username);
+    const usernameDocRef = doc(db, "usernames", formValue);
 
     // commit both docs together as a batch write
     const batch = writeBatch(db);
