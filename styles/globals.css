@@ -277,6 +277,12 @@ input[type="file"] {
   text-align: center;
 }
 
+.box-center > div {
+  height: 117.44px;
+  width: 117.44px;
+  margin: 0 auto;
+}
+
 .hidden {
   display: none;
 }

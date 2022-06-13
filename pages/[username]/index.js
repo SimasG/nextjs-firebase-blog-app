@@ -9,7 +9,7 @@ import {
   getDocs,
   limit,
   orderBy,
-  query,
+  query as fireQuery,
   where,
 } from "firebase/firestore";
 
@@ -25,19 +25,20 @@ export async function getServerSideProps({ query }) {
   let posts = null;
 
   if (userDoc) {
-    const user = userDoc.data();
+    user = userDoc.data();
     const postsRef = collection(db, "posts");
-    const q = query(
+    const q = fireQuery(
       postsRef,
-      where("published", "==", "true"),
+      where("published", "==", true),
       orderBy("createdAt", "desc"),
       limit(5)
     );
-
     posts = (await getDocs(q)).docs.map(postToJSON);
   }
 
-  return { props: { user, posts } };
+  return {
+    props: { user, posts },
+  };
 }
 
 export default function UserProfilePage({ user, posts }) {
