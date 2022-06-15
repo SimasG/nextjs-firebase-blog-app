@@ -26,6 +26,7 @@ export async function getServerSideProps({ query }) {
 
   if (userDoc) {
     user = userDoc.data();
+    // ** Have to make sure I'm only referring to the posts made by the current user
     const postsRef = collection(db, "posts");
     const q = fireQuery(
       postsRef,
