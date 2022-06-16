@@ -24,7 +24,6 @@ export async function getStaticProps({ params }) {
   let path;
 
   if (userDoc) {
-    //** Have to make sure I'm only referring to the posts made by the current user
     const postsRef = collection(db, "users", userDoc.id, "posts");
     const q = query(
       postsRef,
@@ -32,7 +31,6 @@ export async function getStaticProps({ params }) {
       orderBy("createdAt", "desc"),
       limit(1)
     );
-    // post = postToJSON(await getDoc(q));
     post = (await getDocs(q)).docs.map(postToJSON)[0];
     console.log("post:");
     console.log(post);
@@ -54,24 +52,23 @@ export async function getStaticProps({ params }) {
 
 // Telling next.js which paths to pre-render using "getStaticPaths"
 // Otherwise, all possible paths would be pre-rendered (I think so) -> inefficient
-// **Don't understand "getStaticPaths()" yet
 export async function getStaticPaths() {
   // Selecting all the posts in the db
-  // const snapshot = await getDocs(query(collectionGroup(db, "posts")));
+  const snapshot = await getDocs(query(collectionGroup(db, "posts")));
 
-  // const paths = snapshot.docs.map((doc) => {
-  //   const { username, slug } = doc.data();
+  const paths = snapshot.docs.map((doc) => {
+    const { username, slug } = doc.data();
 
-  //   return {
-  //     params: { username, slug },
-  //   };
-  // });
+    return {
+      params: { username, slug },
+    };
+  });
 
-  const paths = [
-    "/testUsername1/testSlug1",
-    "/testUsername2/testSlug2",
-    "/testUsername3/testSlug3",
-  ];
+  // const paths = [
+  //   "/testUsername1/testSlug1",
+  //   "/testUsername2/testSlug2",
+  //   "/testUsername3/testSlug3",
+  // ];
 
   return {
     // With traditional SSG, there would be no way to re-run this func once new posts are created.
@@ -98,7 +95,7 @@ export default function Post(props) {
   return (
     <main className={styles.container}>
       <h1>TESTYY</h1>
-      {/* <Metatags title={post.title} />
+      <Metatags title={post.title} />
       <section>
         <PostContent post={post} />
       </section>
@@ -107,7 +104,7 @@ export default function Post(props) {
         <p>
           <strong>{post.heartCount || 0} ❤️</strong>
         </p>
-      </aside> */}
+      </aside>
     </main>
   );
 }
