@@ -12,10 +12,12 @@ import { useState } from "react";
 import PostFeed from "../components/PostFeed";
 import Loader from "../components/Loader";
 import { db, postToJSON } from "../lib/firebase";
+import Metatags from "../components/Metatags";
 
 // Max post to query per page (for pagination)
 const LIMIT = 1;
 
+// *SSR
 export async function getServerSideProps(context) {
   const postsQuery = query(
     // Collection Group Queries fetch any subcollections with the same name within the tree of nested documents
@@ -73,6 +75,7 @@ export default function Home(props) {
 
   return (
     <main>
+      <Metatags title="Home Page" />
       <PostFeed posts={posts} />
 
       {!loading && !postsEnd && (

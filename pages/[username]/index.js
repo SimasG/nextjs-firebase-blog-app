@@ -3,7 +3,7 @@
 
 import UserProfile from "../../components/UserProfile";
 import PostFeed from "../../components/PostFeed";
-import { db, getUserWithUsername, postToJSON } from "../../lib/firebase";
+import { db, getUserWithUsername, postToJSON, auth } from "../../lib/firebase";
 import {
   collection,
   getDocs,
@@ -12,6 +12,7 @@ import {
   query as fireQuery,
   where,
 } from "firebase/firestore";
+import Metatags from "../../components/Metatags";
 
 // ** SSR: next.js will run this func on the server anytime this page is requested
 // { query } comes from built-in "context" parameter (aka "context.query")
@@ -24,12 +25,19 @@ export async function getServerSideProps({ query }) {
   let user = null;
   let posts = null;
 
+  // If no user, short circuit to 404 page ("404.js in the root pages directory, by default")
+  if (!userDoc) {
+    return {
+      notFound: true,
+    };
+  }
+
   if (userDoc) {
     user = userDoc.data();
-    // ** Have to make sure I'm only referring to the posts made by the current user
-    const postsRef = collection(db, "posts");
+    const postsRef = collection(db, "users", userDoc.id, "posts");
     const q = fireQuery(
       postsRef,
+      where("username", "==", username),
       where("published", "==", true),
       orderBy("createdAt", "desc"),
       limit(5)
@@ -45,6 +53,7 @@ export async function getServerSideProps({ query }) {
 export default function UserProfilePage({ user, posts }) {
   return (
     <main>
+      <Metatags title="User Profile" />
       <UserProfile user={user} />
       <PostFeed posts={posts} />
     </main>

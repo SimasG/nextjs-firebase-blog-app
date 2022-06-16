@@ -6,6 +6,7 @@ import { useContext, useState, useEffect, useCallback } from "react";
 import { UserContext } from "../lib/context";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import debounce from "lodash.debounce";
+import Metatags from "../components/Metatags";
 
 export default function Enter() {
   const { user, username } = useContext(UserContext);
@@ -125,6 +126,8 @@ function UsernameForm() {
 
   return (
     <section>
+      <Metatags title="Login Page" />
+
       <h3>Select Username</h3>
       <form onSubmit={onSubmit}>
         <input
