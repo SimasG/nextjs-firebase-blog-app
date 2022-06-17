@@ -10,6 +10,7 @@ import { auth, db } from "../../lib/firebase";
 import { useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
+import ImageUploader from "../../components/ImageUploader";
 
 export default function AdminPostEdit() {
   return (
@@ -83,7 +84,6 @@ function PostForm({ postRef, defaultValues, preview }) {
   // isValid => true if the conditions we set are met (minLegth, maxLength, etc.)
   // isDirty => true if user has interacted with the form (e.g. typed something in textarea)
   const { isValid, isDirty } = formState;
-  console.log(errors);
 
   // Since "updatePost" is an argument of "handleSubmit" from 'react-hook-form', it has access to
   // the post data (hence {content, published})
@@ -108,6 +108,8 @@ function PostForm({ postRef, defaultValues, preview }) {
         </div>
       )}
       <div className={preview ? styles.hidden : styles.controls}>
+        <ImageUploader />
+
         {/* "{...register("content")}" connects the textarea with post.content via react-hook-form. 
         // Its value will be tracked & validated. Don't understand how it is done tho. */}
         <textarea

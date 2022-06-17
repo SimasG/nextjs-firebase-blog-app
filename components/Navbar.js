@@ -1,6 +1,8 @@
+import { signOut } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useContext } from "react";
+import toast from "react-hot-toast";
 import { UserContext } from "../lib/context";
 import { auth } from "../lib/firebase";
 
