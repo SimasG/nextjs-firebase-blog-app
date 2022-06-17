@@ -5,7 +5,6 @@ import { useDocumentData } from "react-firebase-hooks/firestore";
 import {
   doc,
   collection,
-  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -16,7 +15,6 @@ import {
 import Metatags from "../../components/Metatags";
 
 export async function getStaticProps({ params }) {
-  //   console.log(params);
   const { username, slug } = params;
   const userDoc = await getUserWithUsername(username);
 
@@ -32,13 +30,12 @@ export async function getStaticProps({ params }) {
       limit(1)
     );
     post = (await getDocs(q)).docs.map(postToJSON)[0];
-    console.log("post:");
-    console.log(post);
 
-    // Creating a path(is it a URL?) to make it easier to re-fetch the data on the client-side
-    // when we want to hydrate it to realtime data(what does this mean exactly?)
-    path = postsRef.path;
-    // path = "test path";
+    // Creating a path(e.g. "users/123asd123/posts/321dsa321") to make it easier to re-fetch the data on
+    // the client-side when we want to hydrate it to realtime data(what does this mean exactly?)
+    // path = postsRef.path;
+    // path = "users/h7qOnh3mHWQx0LcPRZAGNpMc2Y72/posts/UGIk0KXHNZbF4HXUNBwh";
+    path = `users/${userDoc.id}/posts/${post.uid}`;
   }
 
   return {
@@ -60,6 +57,7 @@ export async function getStaticPaths() {
     const { username, slug } = doc.data();
 
     return {
+      // Array of all params for paths (URLs) to pre-render (i.e. username/slug)
       params: { username, slug },
     };
   });
@@ -84,18 +82,21 @@ export async function getStaticPaths() {
 // Taking in the props from "getStaticProps" (hence the name) above
 export default function Post(props) {
   // Hydrating from server-rendered content to realtime data
-  const postRef = doc(props.path);
+  const postRef = doc(db, props.path);
+
+  // ** Don't understand this bit
   //   Getting feed to realtime data (in realtime?)
   const [realtimePost] = useDocumentData(postRef);
 
-  //   Defaulting to realtime data. If not there, move to pre-rendered data on the server.
+  //   Defaulting to realtime data (newly created data?).
+  // If not there, move to pre-rendered data on the server.
   const post = realtimePost || props.post;
 
   //   A page that's server-rendered & SEO-friendly BUT also interactive & realtime
   return (
     <main className={styles.container}>
-      <h1>TESTYY</h1>
-      <Metatags title={post.title} />
+      <Metatags title={post.title} description={post.title} />
+
       <section>
         <PostContent post={post} />
       </section>
