@@ -62,12 +62,6 @@ export async function getStaticPaths() {
     };
   });
 
-  // const paths = [
-  //   "/testUsername1/testSlug1",
-  //   "/testUsername2/testSlug2",
-  //   "/testUsername3/testSlug3",
-  // ];
-
   return {
     // With traditional SSG, there would be no way to re-run this func once new posts are created.
     // However, with next.js, we can specify a fallback.
@@ -88,7 +82,7 @@ export default function Post(props) {
   //   Getting feed to realtime data (in realtime?)
   const [realtimePost] = useDocumentData(postRef);
 
-  //   Defaulting to realtime data (newly created data?).
+  // Defaulting to realtime data (newly created data?).
   // If not there, move to pre-rendered data on the server.
   const post = realtimePost || props.post;
 
