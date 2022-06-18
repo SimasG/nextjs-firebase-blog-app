@@ -112,7 +112,7 @@ function UsernameForm() {
     const userDocRef = doc(db, "users", user.uid);
     const usernameDocRef = doc(db, "usernames", formValue);
 
-    // commit both docs together as a batch write
+    // commit both docs together as a batch write (writing both docs either succeeds or fails)
     const batch = writeBatch(db);
     batch.set(userDocRef, {
       username: formValue,
