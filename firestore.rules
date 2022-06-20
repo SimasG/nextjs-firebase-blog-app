@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+    // Boiler plate path for start
+    match /databases/{database}/documents {
+        // Catch-all path -> I wonder why since it justs keeps the nested path rules inside?
+        match /{document=**} {
+
+            // We're required to specify a root rule for collection group queries
+            // I.e. it doesn't matter that we don't event have a "posts" root collection
+            match /posts/{postId} {
+                allow read;
+            }
+
+            match /users/{userId} {
+                allow read;
+                allow create: if isValidUser(userId);
+            }
+
+            match /usernames/{username} {
+                allow read;
+                allow create: if isValidUsername(username);
+            }
+
+            match /users/{userId}/posts/{postId} {
+                allow read;
+                allow create: if canCreatePost(userId); 
+                allow update: if canUpdatePost(userId) || canIncrementHearts(userId, postId);
+                allow delete: if request.auth.uid == userId;
+            }
+
+            match /users/{userId}/posts/{postId}/hearts/{heartId} {
+                allow read;
+                allow write: if request.auth.uid == heartId;
+            }
+
+
+            // USERS
+            function isValidUser(userId) {
+                // "isOwner" is true if the id of user who sent a request is the same as the logged in user, 
+                let isOwner = request.auth.uid == userId;
+
+                let username = request.resource.data.username;
+
+                // "existsAfter()" allows us to see if the username would be added to the db 
+                // (aka is it unique in our case)
+                // "$(database)" -> interesting new syntax
+                let createdValidUsername = existsAfter(/databases/$(database)/documents/{document}/usernames/$(username));
+
+                // Returning 2 boolean values. If both of them are true -> it will be true in the condition
+                return isOwner && createdValidUsername;
+            }
+
+            function isValidUsername(username) {
+                let isOwner = request.auth.uid == request.resource.data.uid;
+                let isValidLength = username.size() >= 3 && username.size() <= 15;
+
+                // ** Confusing
+                let isValidUserDoc = getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
+
+                return isOwnwer && isValidLength && isValidUserDoc;
+            }
+
+            // POSTS
+            function canCreatePost(userId) {
+                let isOwner = request.auth.uid == userId;
+                // E.g. "createdAt" is already a key created by me
+                let isNow = request.time == request.resource.data.createdAt;
+                let isValidContent = request.resource.data.content.size() < 20000 && request.resource.data.heartCount == 0;
+                
+                // ** Confusing
+                let username = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username;
+                let usernameMatches = username == request.resource.data.username;
+
+                return isOwner && isNow && isValidContent && usernameMatches;
+            }
+
+            function canUpdatePost(userId) {
+                let isOwner = request.auth.uid == userId;
+                let isNow = request.time == request.resource.data.updatedAt;
+                let isValidContent = request.resource.data.content.size() < 20000;
+                let doesNotUpdateForbidden = !request.resource.data.diff(resouce.data).affectedKeys().hasAny(['uid', 'username', 'heartCount']);
+
+                return isOwner && isNow && isValidContent && doesNotUpdateForbidden;
+            }
+
+            // HEARTS
+            function canIncrementHearts(userId, postId) {
+                let hasValidFields = request.resource.data.diff(resource.data).affectedKeys().hasOnly(['heartCount']);
+                let currentUser = request.auth.uid;
+                let heartDocExistsAfter = existsAfter(/databases/$(database)/documents/users/$(userId)/posts/$(postId)/hearts/$(currentUser));
+                let heartDocExists = exists(/databases/$(database)/documents/users/$(userId)/posts/$(postId)/hearts/$(currentUser));
+
+                let heartDocAdded = heartDocExistsAfter && !heartDocExists;
+                let heartDocRemoved = !heartDocExistsAfter && heartDocExists;
+
+                // ** What's the diff between "request.resource" & "resource"?
+                let countChange = request.resource.data.heartCount - resource.data.heartCount;
+                let validChange = countChange == 1 || countChange == -1;
+
+                return hasValidFields && validChange && (countChange == 1 ? heartDocAdded : heartDocRemoved);
+            }
+        }
+    }
+}
